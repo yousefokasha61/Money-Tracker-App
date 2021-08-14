@@ -119,30 +119,46 @@ class _MyHomePageState extends State<MyHomePage> {
     });
   }
 
-  Widget _buildLandscapeContent() {
-    return Row(
-      children: [
-        Text('Show Chart'),
-        Switch(
-            value: _showChart,
-            onChanged: (val) {
-              setState(() {
-                _showChart = val;
-              });
-            }),
-      ],
-      mainAxisAlignment: MainAxisAlignment.center,
-    );
+  List<Widget> _buildLandscapeContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Row(
+        children: [
+          Text('Show Chart'),
+          Switch(
+              value: _showChart,
+              onChanged: (val) {
+                setState(() {
+                  _showChart = val;
+                });
+              }),
+        ],
+        mainAxisAlignment: MainAxisAlignment.center,
+      ),
+      _showChart
+          ? Container(
+              height: (mediaQuery.size.height -
+                      appBar.preferredSize.height -
+                      mediaQuery.padding.top) *
+                  0.7,
+              child: Chart(_recentTransactions),
+            )
+          : txListWidget
+    ];
   }
 
-  Widget _buildPortraitContent(MediaQueryData mediaQuery, AppBar appBar) {
-    return Container(
-      height: (mediaQuery.size.height -
-              appBar.preferredSize.height -
-              mediaQuery.padding.top) *
-          0.3,
-      child: Chart(_recentTransactions),
-    );
+  List<Widget> _buildPortraitContent(
+      MediaQueryData mediaQuery, AppBar appBar, Widget txListWidget) {
+    return [
+      Container(
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.3,
+        child: Chart(_recentTransactions),
+      ),
+      txListWidget
+    ];
   }
 
   @override
@@ -174,19 +190,12 @@ class _MyHomePageState extends State<MyHomePage> {
           //mainAxisAlignment: MainAxisAlignment.spaceAround,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: <Widget>[
-            if (isLandscape) _buildLandscapeContent(),
-            if (!isLandscape) _buildPortraitContent(mediaQuery, appBar),
-            if (!isLandscape) txListWidget,
             if (isLandscape)
-              _showChart
-                  ? Container(
-                      height: (mediaQuery.size.height -
-                              appBar.preferredSize.height -
-                              mediaQuery.padding.top) *
-                          0.7,
-                      child: Chart(_recentTransactions),
-                    )
-                  : txListWidget
+              ..._buildLandscapeContent(mediaQuery, appBar, txListWidget),
+            if (!isLandscape)
+              ..._buildPortraitContent(mediaQuery, appBar, txListWidget),
+            if (isLandscape)
+              ..._buildLandscapeContent(mediaQuery, appBar, txListWidget),
           ],
         ),
       ),
